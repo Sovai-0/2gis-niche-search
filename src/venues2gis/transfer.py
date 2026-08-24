@@ -75,7 +75,7 @@ def pack(raw_dir: Path, db_path: Path, out_dir: Path, dest: Optional[Path] = Non
     stamp = datetime.now().strftime("%Y%m%d-%H%M")
     tag = "-".join(regions[:3]) if regions else "data"
     if dest is None:
-        dest = Path.cwd() / f"kz-venues-{tag}-{stamp}.zip"
+        dest = Path.cwd() / f"2gis-{tag}-{stamp}.zip"
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
 

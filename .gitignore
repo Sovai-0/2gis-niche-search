@@ -7,7 +7,7 @@ logs/
 .chrome-profile*/
 
 # Архивы, которыми обмениваются участники сбора.
-kz-venues-*.zip
+2gis-*.zip
 
 # Python
 __pycache__/

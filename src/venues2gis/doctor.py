@@ -72,14 +72,12 @@ def _packages_check() -> list[Check]:
 
 
 def _browser_version(binary: str) -> str:
-    """Спрашиваем у самого браузера; на Windows --version молчит - там смотрим свойства файла."""
-    try:
-        res = subprocess.run([binary, "--version"], capture_output=True, text=True, timeout=15)
-        lines = (res.stdout or res.stderr or "").strip().splitlines()
-        if lines and lines[0].strip():
-            return lines[0].strip()
-    except (OSError, subprocess.SubprocessError):
-        pass
+    """Версия браузера.
+
+    На Windows chrome.exe --version ничего не печатает, а если браузер уже запущен,
+    то ещё и отвечает служебным сообщением про открытие вкладки. Поэтому там сразу
+    смотрим свойства файла, а --version оставляем для macOS и Linux.
+    """
     if os.name == "nt":
         try:
             cmd = "(Get-Item \"" + binary + "\").VersionInfo.ProductVersion"
@@ -88,6 +86,15 @@ def _browser_version(binary: str) -> str:
             version = (res.stdout or "").strip()
             if version:
                 return "версия " + version
+        except (OSError, subprocess.SubprocessError):
+            pass
+    else:
+        try:
+            res = subprocess.run([binary, "--version"], capture_output=True,
+                                 text=True, timeout=15)
+            lines = (res.stdout or res.stderr or "").strip().splitlines()
+            if lines and lines[0].strip():
+                return lines[0].strip()
         except (OSError, subprocess.SubprocessError):
             pass
     return "версию определить не удалось"
