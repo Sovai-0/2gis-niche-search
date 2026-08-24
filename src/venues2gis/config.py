@@ -28,6 +28,11 @@ class CollectConfig(BaseModel):
     # Наборы рубрик каталога: core (заведомо площадки), food (общепит и жильё).
     # Рубрики дают гарантированное покрытие, слои layers - добор расширенных.
     rubric_sets: list[str] = Field(default_factory=lambda: list(DEFAULT_RUBRIC_SETS))
+    # Свой список ID рубрик 2GIS. Задан - полностью заменяет rubric_sets.
+    # Так проект переводится на любую другую тему без правки кода.
+    rubrics: Optional[list[str]] = None
+    # Свой список поисковых слов. Задан - полностью заменяет layers.
+    queries: Optional[list[str]] = None
     # Сколько параллельных воркеров поднимать. Упирается не в память, а в CPU
     # и в терпение антибота, поэтому наращивать стоит ступенями с замером.
     workers: int = 1

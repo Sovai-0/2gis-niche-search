@@ -32,11 +32,15 @@ def plan_tasks(cfg: Config, store: Store, regions: list[Region]) -> int:
     когда дойдут слова, большинство заведений уже будет в очереди фазы B -
     слова добавят только то, чего рубрики не поймали.
     """
-    sources = build_rubric_sources(cfg.collect.rubric_sets) + build_queries(cfg.collect.layers)
+    rubric_sources = build_rubric_sources(cfg.collect.rubric_sets, cfg.collect.rubrics)
+    query_sources = build_queries(cfg.collect.layers, cfg.collect.queries)
+    sources = rubric_sources + query_sources
+    if not sources:
+        logger.error("Не задано ни одного источника: проверьте collect.rubrics / "
+                     "collect.queries / rubric_sets / layers в config.yaml")
+        return 0
     logger.info("План: %d регионов x %d источников (%d рубрик + %d слов) = %d задач",
-                len(regions), len(sources),
-                len(build_rubric_sources(cfg.collect.rubric_sets)),
-                len(build_queries(cfg.collect.layers)),
+                len(regions), len(sources), len(rubric_sources), len(query_sources),
                 len(regions) * len(sources))
     return store.enqueue_tasks((r.code, r.host, s) for r in regions for s in sources)
 

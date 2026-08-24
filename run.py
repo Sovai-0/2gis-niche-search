@@ -64,6 +64,10 @@ def build_parser() -> argparse.ArgumentParser:
                            help="Сколько параллельных воркеров (по умолчанию из конфига)")
     p_collect.add_argument("--rubric-set", action="append", dest="rubric_sets", default=None,
                            help="Набор рубрик: core|food; можно повторять")
+    p_collect.add_argument("--rubric", action="append", dest="rubrics", default=None,
+                           help="ID рубрики 2GIS; можно повторять. Заменяет наборы рубрик")
+    p_collect.add_argument("--query", action="append", dest="queries", default=None,
+                           help="Поисковое слово; можно повторять. Заменяет слои запросов")
     p_collect.add_argument("--max-seconds", type=float, default=None,
                            help="Ограничить время работы каждого воркера, секунд")
     p_collect.add_argument("--plan-only", action="store_true",
@@ -132,6 +136,10 @@ def main() -> int:
             cfg.collect.layers = args.layers
         if args.rubric_sets:
             cfg.collect.rubric_sets = args.rubric_sets
+        if args.rubrics:
+            cfg.collect.rubrics = args.rubrics
+        if args.queries:
+            cfg.collect.queries = args.queries
         if args.max_pages:
             cfg.collect.max_pages_per_task = args.max_pages
         if args.headless:

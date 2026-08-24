@@ -94,10 +94,21 @@ RUBRIC_SETS: dict[str, list[tuple[str, str]]] = {
 DEFAULT_RUBRIC_SETS = ("core", "food")
 
 
-def build_rubric_sources(sets=DEFAULT_RUBRIC_SETS) -> list[str]:
-    """Список источников вида rubric:10803, без повторов, в порядке наборов."""
+def build_rubric_sources(sets=DEFAULT_RUBRIC_SETS, custom=None) -> list[str]:
+    """Список источников вида rubric:10803, без повторов, в порядке наборов.
+
+    Свой список ID в config.yaml (collect.rubrics) полностью заменяет наборы -
+    так проект перенастраивается на другую предметную область без правки кода.
+    """
     out: list[str] = []
     seen: set[str] = set()
+    if custom:
+        for rid in custom:
+            rid = str(rid).strip().removeprefix("rubric:")
+            if rid and rid not in seen:
+                seen.add(rid)
+                out.append("rubric:" + rid)
+        return out
     for name in sets:
         for rid, _title in RUBRIC_SETS.get(name, []):
             if rid in seen:

@@ -148,10 +148,22 @@ LAYERS: dict[str, list[str]] = {
 DEFAULT_LAYERS = ("rubric", "ru", "kz", "en")
 
 
-def build_queries(layers: Iterable[str] = DEFAULT_LAYERS) -> list[str]:
-    """Собирает уникальный список запросов, сохраняя порядок слоёв."""
+def build_queries(layers: Iterable[str] = DEFAULT_LAYERS,
+                  custom: Iterable[str] | None = None) -> list[str]:
+    """Собирает уникальный список запросов, сохраняя порядок слоёв.
+
+    Свой список слов в config.yaml (collect.queries) полностью заменяет слои:
+    именно так проект переводится на любую другую тему поиска.
+    """
     result: list[str] = []
     seen: set[str] = set()
+    if custom:
+        for q in custom:
+            q = str(q).strip()
+            if q and q.casefold() not in seen:
+                seen.add(q.casefold())
+                result.append(q)
+        return result
     for layer in layers:
         for q in LAYERS.get(layer, []):
             key = q.casefold()
