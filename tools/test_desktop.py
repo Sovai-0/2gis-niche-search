@@ -104,8 +104,11 @@ class BrowserTest(unittest.TestCase):
         session = BrowserSession(BrowserOptions(profile_dir=Path(folder.name) / "browser", headless=True))
         cls.addClassCleanup(session.stop)
         session.start()
-        cls.context = session.browser.new_context()
+        cls.context = session.browser.new_context(service_workers="block")
         cls.addClassCleanup(cls.context.close)
+        warmup = cls.context.new_page()
+        warmup.goto("data:text/html,<title>Ready</title>", wait_until="load")
+        warmup.close()
 
     def check(self, pages, *, site="", socials=None):
         def handle(route):
@@ -130,7 +133,7 @@ class BrowserTest(unittest.TestCase):
             CARD: base + '<button type="button" onclick="document.querySelector(\'#booking\').hidden=false">'
                          'Записаться</button><div id="booking" hidden>' + FORM + '</div>',
         }, socials={"telegram": [TELEGRAM]})
-        self.assertEqual(category(internal)[0], 4)
+        self.assertEqual(category(internal)[0], 4, str(internal))
         self.assertEqual(internal.bot, TELEGRAM)
 
         external = self.check({CARD: base + f'<a href="{BOOKING}">Онлайн-запись</a>',
