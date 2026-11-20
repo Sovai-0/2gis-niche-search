@@ -23,3 +23,7 @@ env/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Сборки настольного приложения.
+build/
+dist/

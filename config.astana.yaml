@@ -1,0 +1,7 @@
+collect:
+  country: kz
+  regions: [nur_sultan]
+  # Передавай нишу через --query или ID рубрики через --rubric.
+  layers: []
+  rubric_sets: []
+  workers: 1

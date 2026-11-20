@@ -15,7 +15,7 @@ from __future__ import annotations
 import signal
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from .browser import BrowserOptions, BrowserSession
 from .cards import AntibotBlocked as CardsAntibot
@@ -69,11 +69,16 @@ def worker_browser_options(cfg: Config, worker_id: int) -> BrowserOptions:
 
 
 def run_worker(cfg: Config, worker_id: int = 0, max_seconds: Optional[float] = None,
-               own_signals: bool = True) -> dict:
+               own_signals: bool = True,
+               cancel: Optional[Callable[[], bool]] = None,
+               progress: Optional[Callable[[dict], None]] = None) -> dict:
     """Крутит цикл «взять работу - сделать» до опустошения очередей."""
     store = Store(Path(cfg.paths.db_path), Path(cfg.paths.raw_dir), worker=str(worker_id))
     stop = StopFlag() if own_signals else None
-    should_stop = stop if stop is not None else (lambda: False)
+
+    def should_stop() -> bool:
+        return bool((stop and stop()) or (cancel and cancel()))
+
     deadline = time.monotonic() + max_seconds if max_seconds else None
 
     session: Optional[BrowserSession] = None
@@ -147,6 +152,9 @@ def run_worker(cfg: Config, worker_id: int = 0, max_seconds: Optional[float] = N
                 tasks_done += 1
                 if res.stopped:
                     break
+
+            if progress is not None:
+                progress(stats)
 
             if (cfg.browser.restart_every_tasks
                     and tasks_done % cfg.browser.restart_every_tasks == 0
