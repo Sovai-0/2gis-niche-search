@@ -38,8 +38,18 @@ jobs:
           unpacked=$(mktemp -d)
           ditto -x -k "dist/2GIS-Niche-Search-macOS-$APP_ARCH.zip" "$unpacked"
           app="$unpacked/2GIS Niche Search.app"
-          lipo -verify_arch "$APP_ARCH" "$app/Contents/MacOS/2GIS Niche Search"
+          executable="$app/Contents/MacOS/2GIS Niche Search"
+          lipo "$executable" -verify_arch "$APP_ARCH"
           codesign --verify --deep --strict "$app"
+          "$executable" > "$unpacked/startup.log" 2>&1 &
+          app_pid=$!
+          sleep 5
+          if ! kill -0 "$app_pid" 2>/dev/null; then
+            cat "$unpacked/startup.log"
+            exit 1
+          fi
+          kill "$app_pid"
+          wait "$app_pid" || true
       - uses: actions/upload-artifact@v7
         with:
           path: dist/2GIS-Niche-Search-macOS-${{ matrix.arch }}.zip
