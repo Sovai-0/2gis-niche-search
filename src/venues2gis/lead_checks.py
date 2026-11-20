@@ -215,7 +215,8 @@ def card_booking(page, card_url: str, snapshot: dict, result: Findings, queue: d
                 href = tab.first.get_attribute("href")
                 if href and not on_domain(public_url(href), GIS):
                     continue
-                tab.first.click(timeout=1800)
+                page.bring_to_front()
+                tab.first.click(timeout=5000)
                 page.wait_for_timeout(650)
                 queue.extend((url, "booking") for url in booking_candidates(snapshot_page(page)))
             except (PlaywrightError, ValueError):
@@ -233,7 +234,9 @@ def card_booking(page, card_url: str, snapshot: dict, result: Findings, queue: d
 
             page.on("popup", opened)
             try:
-                control.click(timeout=1800)
+                # Chromium замедляет отрисовку фоновых вкладок и проверки клика.
+                page.bring_to_front()
+                control.click(timeout=5000)
                 page.wait_for_timeout(950)
                 for new_page in popup:
                     target = public_url(new_page.url)
@@ -366,7 +369,8 @@ def inspect_company(card, web, row: dict, cancelled) -> Findings:
                 if not control.is_visible() or control.evaluate("e => Boolean(e.closest('form'))"):
                     continue
                 try:
-                    control.click(timeout=1500)
+                    web.bring_to_front()
+                    control.click(timeout=5000)
                     web.wait_for_timeout(650)
                     updated = snapshot_page(web)
                     if has_booking_form(web, updated, contextual=True):
