@@ -2,6 +2,17 @@ name: Build macOS app
 
 on:
   workflow_dispatch:
+    inputs:
+      architecture:
+        description: Build target
+        type: choice
+        default: both
+        options: [both, arm64, x86_64]
+      arm_runner:
+        description: GitHub runner image for Apple Silicon
+        type: choice
+        default: macos-15
+        options: [macos-15, macos-26]
 
 permissions:
   contents: read
@@ -9,16 +20,12 @@ permissions:
 jobs:
   build:
     name: macOS (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.arch == 'arm64' && inputs.arm_runner || 'macos-15-intel' }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runner: macos-15
-            arch: arm64
-          - runner: macos-15-intel
-            arch: x86_64
+        arch: ${{ fromJSON(inputs.architecture == 'both' && '["arm64","x86_64"]' || format('["{0}"]', inputs.architecture)) }}
     steps:
       - uses: actions/checkout@v7
         with:
